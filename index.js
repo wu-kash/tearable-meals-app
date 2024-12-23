@@ -30,5 +30,5 @@ app.post('/delete_customer_recipe', deleteCustomerRecipe);
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Backend API listening at http://localhost:${PORT}`);
+  console.log(`Backend API live`);
 });
