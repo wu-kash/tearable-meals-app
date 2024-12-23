@@ -11,7 +11,7 @@ import { createCustomerRecipe, deleteCustomerRecipe, updateCustomerRecipe } from
 //https://shopify.dev/docs/api/admin-graphql/2024-10/mutations/metaobjectCreate
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 4000;
 
 // Middleware
 app.use(cors({
