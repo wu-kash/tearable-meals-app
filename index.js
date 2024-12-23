@@ -29,6 +29,6 @@ app.post('/update_customer_recipe', updateCustomerRecipe);
 app.post('/delete_customer_recipe', deleteCustomerRecipe);
 
 // Start the server
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", function () {
   console.log(`Backend API live ${PORT}`);
 });
