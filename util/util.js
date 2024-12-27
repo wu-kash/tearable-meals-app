@@ -3,8 +3,10 @@ const customerGIDBase =  `gid://shopify/Customer/{id}`;
 
 export function getGlobalID(type, id) {
 
-    if (id.startsWith('gid')) {
-        return id;
+    if (typeof id == "string") {
+        if (id.startsWith('gid')) {
+            return id;
+        }
     }
 
     if (type == 'metaobject') {

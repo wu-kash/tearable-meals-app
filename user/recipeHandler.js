@@ -1,7 +1,7 @@
 import { shopify } from '../shopify/shopify.js'
 import { getCustomerMetafields } from '../shopify/customer.js'
 import { createMetaobjectCustomerRecipe, deleteMetaobject } from '../shopify/metaobject.js'
-
+import { getGlobalID } from '../util/util.js'
 
 // recipeData = 
 // {
@@ -20,8 +20,22 @@ export async function createCustomerRecipe(req, res) {
     console.log('Received data from Shopify ...');
     const recipeData = req.body.recipe_data; // The data sent from the frontend
     const customerID = req.body.customer_id;
-    const customerGID = `gid://shopify/Customer/${customerID}`;
-    const metaobjectType = "customer_recipe";
+    const customerGID = getGlobalID('customer', customerID);
+
+    await createAndLinkCustomerRecipe(recipeData, customerGID);
+
+    // Process the data (e.g., store in a database, send to another API, etc.)
+    const responseMessage = {
+        success: true,
+        message: 'Data received successfully',
+        receivedData: recipeData, // Echo back the received data
+    };
+
+    // Respond to the frontend
+    res.json(responseMessage);
+}
+
+export async function createAndLinkCustomerRecipe(recipeData, customerGID) {
 
     var createdMetaobjectGID = null;
     try {
@@ -50,15 +64,6 @@ export async function createCustomerRecipe(req, res) {
         throw err;
     }
 
-    // Process the data (e.g., store in a database, send to another API, etc.)
-    const responseMessage = {
-        success: true,
-        message: 'Data received successfully',
-        receivedData: recipeData, // Echo back the received data
-    };
-
-    // Respond to the frontend
-    res.json(responseMessage);
 }
 
 export async function updateCustomerRecipe(req, res) {
@@ -66,7 +71,7 @@ export async function updateCustomerRecipe(req, res) {
     console.log('Received data from Shopify ...');
     const recipeData = req.body.recipe_data; // The data sent from the frontend
     const recipeID = req.body.recipe_id;
-    const recipeGID = `gid://shopify/Metaobject/${recipeID}`;
+    const recipeGID = getGlobalID('metaobject', recipeID);
 
     const query = `
         mutation UpdateMetaobject($id: ID!, $metaobject: MetaobjectUpdateInput!) {
@@ -132,8 +137,7 @@ export async function deleteCustomerRecipe(req, res) {
 
     const recipeID = req.body.recipe_id; 
     const customerID = req.body.customer_id;
-
-    const recipeGID =  `gid://shopify/Metaobject/${recipeID}`;
+    const recipeGID = getGlobalID('metaobject', recipeID);
 
     console.log(`Deleting recipe ID '${recipeID} for customer ID '${customerID}`);
 
