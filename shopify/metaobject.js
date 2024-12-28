@@ -1,42 +1,44 @@
 import { shopify } from './shopify.js';
 import { getGlobalID } from "../util/util.js";
 
-export async function createMetaobjectCustomerRecipe(recipeData) {
+export async function createMetaobjectCustomerRecipe(recipeData, recipeType) {
 
-  const query = `
+    console.log(`Creating Metaobject: ${recipeType}`);
+
+    const query = `
         mutation CreateMetaobject($metaobject: MetaobjectCreateInput!) {
             metaobjectCreate(metaobject: $metaobject) {
-            metaobject {
-                id
-                type
-                handle
-                fields {
-                key
-                value
+                metaobject {
+                    id
+                    type
+                    handle
+                    fields {
+                    key
+                    value
+                    }
+                }
+                userErrors {
+                    field
+                    message
                 }
             }
-            userErrors {
-                field
-                message
-            }
-            }
         }
-        `;
+    `;
 
     const variables = {
-            metaobject: {
-            type: "customer_recipe",
-            fields: [
-                { key: "title", value: recipeData.title },
-                { key: "source", value: recipeData.source },
-                { key: "portions", value: recipeData.portions },
-                { key: "preparation_time", value: recipeData.preparation_time },
-                { key: "cooking_time", value: recipeData.cooking_time },
-                { key: "ingredients", value: JSON.stringify(recipeData.ingredients) },
-                { key: "preparation_steps", value: JSON.stringify(recipeData.preparation_steps) },
-                { key: "cooking_steps", value: JSON.stringify(recipeData.cooking_steps) },
-            ],
-            }
+        metaobject: {
+        type: recipeType,
+        fields: [
+            { key: "title", value: recipeData.title },
+            { key: "source", value: recipeData.source },
+            { key: "portions", value: recipeData.portions },
+            { key: "preparation_time", value: recipeData.preparation_time },
+            { key: "cooking_time", value: recipeData.cooking_time },
+            { key: "ingredients", value: JSON.stringify(recipeData.ingredients) },
+            { key: "preparation_steps", value: JSON.stringify(recipeData.preparation_steps) },
+            { key: "cooking_steps", value: JSON.stringify(recipeData.cooking_steps) },
+        ],
+        }
     };
 
     try {
@@ -45,7 +47,7 @@ export async function createMetaobjectCustomerRecipe(recipeData) {
         console.log(`Created Metaobject (ID: ${createdMetaobjectGID})`);
         return createdMetaobjectGID;
     } catch(err) {
-        console.log(`Failed to created metaobject 'customer_recipe'`);
+        console.log(`Failed to created metaobject "${recipeType}"`);
         console.error(err);
         return null;
     }
@@ -57,15 +59,15 @@ export async function deleteMetaobject(metaobjectGID) {
   const query = `
         mutation DeleteMetaobject($id: ID!) {
             metaobjectDelete(id: $id) {
-            deletedId
-            userErrors {
-                field
-                message
-                code
-            }
+                deletedId
+                userErrors {
+                    field
+                    message
+                    code
+                }
             }
         }
-        `;
+    `;
 
     const variables = {
             id: metaobjectGID

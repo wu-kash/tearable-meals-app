@@ -1,7 +1,10 @@
 import { shopify } from './shopify.js';
 
-export async function getCustomerMetafields(customerGID) {
+const recipeLimit = parseInt(process.env.MAX_CUSTOMER_RECIPES_FREE);
 
+export async function getCustomerMetafields(customerGID, recipeType) {
+
+    const useMetafieldKey = `custom.${recipeType}s`;
     // customerGID: "gid://shopify/Customer/<id>"
   
     console.log(`Getting customer '${customerGID}' Metafields`);
@@ -22,7 +25,7 @@ export async function getCustomerMetafields(customerGID) {
   
     const variables = {
       ownerId: customerGID,
-      keys: ["custom.customer_recipes"]
+      keys: [useMetafieldKey]
     };
   
     try {
@@ -30,10 +33,10 @@ export async function getCustomerMetafields(customerGID) {
   
       if ( response.customer.metafields.edges.length > 0 ) {
         const customerRecipeMetafieldID = response.customer.metafields.edges[0].node.id;
-        const customerMetaobjectIDs = response.customer.metafields.edges[0].node.value;
+        const customerMetaobjectIDs = JSON.parse(response.customer.metafields.edges[0].node.value);
         console.log(`Customer Recipe Metafield ID '${customerRecipeMetafieldID}'`);
         console.log(`Customer Metaobject IDs:`);
-        console.log(JSON.parse(customerMetaobjectIDs));
+        console.log(customerMetaobjectIDs);
         return [customerRecipeMetafieldID, customerMetaobjectIDs];
       } else {
         console.log('No existing customer_recipe metaobjects found');
@@ -44,3 +47,60 @@ export async function getCustomerMetafields(customerGID) {
       throw err;
     }
   }
+
+export async function getManualRecipes(customerGID) {
+
+  const metaObjectType = 'customer_recipe';
+  console.log(`[INFO] Getting metaobjects ${metaObjectType}`);
+  const [metafieldGID, existingMetaobjectGIDs] = await getCustomerMetafields(customerGID, metaObjectType);
+
+  var canCreate = true;
+  if (existingMetaobjectGIDs.length > recipeLimit) {
+    canCreate = false;
+  } 
+
+  const customerRecipes = {
+    'type': metaObjectType,
+    'metafield_gid': metafieldGID,
+    'metaobjects_gid': existingMetaobjectGIDs,
+    'num_recipes': existingMetaobjectGIDs.length,
+    'can_create': canCreate 
+  }
+
+  return customerRecipes
+}
+
+export async function getGeneratedRecipes(customerGID) {
+
+  const metaObjectType = 'generated_recipe';
+  console.log(`[INFO] Getting metaobjects ${metaObjectType}`);
+  const [metafieldGID, existingMetaobjectGIDs] = await getCustomerMetafields(customerGID, metaObjectType);
+
+  var canCreate = true;
+  if (existingMetaobjectGIDs.length > recipeLimit) {
+    canCreate = false;
+  } 
+
+  const generatedRecipes = {
+    'type': metaObjectType,
+    'metafield_gid': metafieldGID,
+    'metaobjects_gid': existingMetaobjectGIDs,
+    'num_recipes': existingMetaobjectGIDs.length,
+    'can_create': canCreate 
+  }
+
+  return generatedRecipes
+}
+
+export async function getAllRecipes(customerGID) {
+
+  const manualRecipes = await getManualRecipes(customerGID);
+  const generatedRecipes = await getGeneratedRecipes(customerGID);
+
+  const allRecipes = {
+    'customer_recipes': manualRecipes,
+    'generated_recipes': generatedRecipes,
+  }
+  
+  return allRecipes;
+}

@@ -7,6 +7,7 @@ dotenv.config();
 
 import { canCreateRecipe, isValidRecipe } from './validation/validation.js';
 import { createCustomerRecipe, deleteCustomerRecipe, updateCustomerRecipe } from './user/recipeHandler.js';
+import { aiGenerateUrlRecipe, aiGenerateIngredientRecipe } from './openai_processing/processing.js';
 
 //https://shopify.dev/docs/api/admin-graphql/2024-10/mutations/metaobjectCreate
 
@@ -27,6 +28,10 @@ app.get('/isValidRID/:customerID/:recipeID', isValidRecipe);
 app.post('/create_customer_recipe', createCustomerRecipe);
 app.post('/update_customer_recipe', updateCustomerRecipe);
 app.post('/delete_customer_recipe', deleteCustomerRecipe);
+
+// AI Processing
+app.post('/generate_url_recipe', aiGenerateUrlRecipe);
+app.post('/generate_ingredient_recipe', aiGenerateIngredientRecipe);
 
 // Start the server
 app.listen(PORT, "0.0.0.0", function () {
