@@ -9,8 +9,6 @@ export const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
 });
 
-export const OPENAI_MODEL = process.env.OPENAI_MODEL;
-
 export const RecipeInformationEvent = z.object({
     Title: z.string(),
     Portions: z.string(),

@@ -1,4 +1,4 @@
-import { openai, OPENAI_MODEL } from './openai.js';
+import { openai } from './openai.js';
 import { createAndLinkCustomerRecipe } from '../user/recipeHandler.js'
 import { getGlobalID } from '../util/util.js'
 import { json } from 'express';
