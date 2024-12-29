@@ -7,7 +7,7 @@ dotenv.config();
 
 import { canCreateRecipe, isValidRecipe } from './validation/validation.js';
 import { createCustomerRecipe, deleteCustomerRecipe, updateCustomerRecipe } from './user/recipeHandler.js';
-import { aiGenerateUrlRecipe, aiGenerateIngredientRecipe } from './openai_processing/processing.js';
+import { aiGenerateUrlRecipe, aiGenerateIngredientRecipe } from './alessio/processing.js';
 
 //https://shopify.dev/docs/api/admin-graphql/2024-10/mutations/metaobjectCreate
 
@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 4000;
 
 // Middleware
 app.use(cors({
-  origin: 'https://www.tearablemeals.com', // Replace with your Shopify domain
+	origin: 'https://www.tearablemeals.com', // Replace with your Shopify domain
 }));
 app.use(express.json()); // To parse JSON request bodies
 
@@ -35,5 +35,5 @@ app.post('/generate_ingredient_recipe', aiGenerateIngredientRecipe);
 
 // Start the server
 app.listen(PORT, "0.0.0.0", function () {
-  console.log(`Backend API live ${PORT}`);
+	console.info(`Backend API live ${PORT}`);
 });

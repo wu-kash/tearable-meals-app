@@ -1,5 +1,5 @@
-import { getCustomerMetafields, getAllRecipes } from "../shopify/customer.js";
-import { getMetaobjectData } from "../shopify/metaobject.js";
+import { getAllRecipes } from "../shopify/customer.js";
+import { queryMetaObject } from "../shopify/query.js";
 import { getGlobalID } from '../util/util.js'
 
 const recipeLimit = parseInt(process.env.MAX_CUSTOMER_RECIPES_FREE);
@@ -14,8 +14,6 @@ export async function canCreateRecipe(req, res) {
     const allRecipes = await getAllRecipes(customerGID);
     const customerRecipes = allRecipes.customer_recipes;
     const generatedRecipes = allRecipes.generated_recipes;
-  
-
   
     res.json({ 
       canCreateRecipe: customerRecipes.can_create,
@@ -51,7 +49,7 @@ export async function isValidRecipe(req, res) {
     }
 
     if (isValidRecipeID) {
-        recipeData = await getMetaobjectData(recipeGID);
+        recipeData = await queryMetaObject(recipeGID);
     }
 
     res.json({ 

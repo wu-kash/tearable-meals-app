@@ -1,6 +1,6 @@
 import { shopify } from '../shopify/shopify.js'
-import { getCustomerMetafields } from '../shopify/customer.js'
-import { createMetaobjectCustomerRecipe, deleteMetaobject } from '../shopify/metaobject.js'
+import { queryCustomerMetaField } from '../shopify/query.js'
+import { createMetaobjectRecipe, deleteMetaobject } from '../shopify/metaobject.js'
 import { getGlobalID } from '../util/util.js'
 
 // recipeData = 
@@ -39,20 +39,20 @@ export async function createAndLinkCustomerRecipe(recipeData, customerGID, recip
 
     var createdMetaobjectGID = null;
     try {
-        createdMetaobjectGID = await createMetaobjectCustomerRecipe(recipeData, recipeType);
+        const MetaObject = await createMetaobjectRecipe(recipeData, recipeType);
 
         // Get the customer_recipes metafield ID and the existing metaobjects 
-        const [metafieldGID, existingMetaobjectGIDs] = await getCustomerMetafields(customerGID, recipeType);
+        const MetaField = await queryCustomerMetaField(customerGID, recipeType);
 
-        if (metafieldGID == null) {
+        if (MetaField.id == null) {
             console.log('Metafield GID is null, create new metafield');
-            await createFirstRecipeForCustomer(customerGID, createdMetaobjectGID, recipeType);
+            await createFirstRecipeForCustomer(customerGID, MetaObject.id, recipeType);
 
-        } else if (existingMetaobjectGIDs == null) {
+        } else if (MetaField.metaobjects == null) {
             console.log('Metaobjects GIDs is null');
         } else {
             console.log('Link new Metaobject GID to Customer GID');
-            await linkRecipeToCustomer(customerGID, metafieldGID, existingMetaobjectGIDs, createdMetaobjectGID)
+            await linkRecipeToCustomer(customerGID, MetaField, MetaObject)
         }
     
     } catch(err) {
@@ -152,16 +152,16 @@ export async function deleteCustomerRecipe(req, res) {
     res.json(responseMessage)
 };
 
-async function linkRecipeToCustomer(customerGID, metafieldGID, existingMetaobjectGIDs, createdMetaobjectGID) {
+async function linkRecipeToCustomer(customerGID, MetaField, MetaObject) {
 
     console.log(`Customer GID: ${customerGID}`);
-    console.log(`Metafield GID: ${metafieldGID}`);
-    console.log(`Existing Metaobject GIDs: ${existingMetaobjectGIDs}`);
-    console.log(`Created Metaobject GID: ${createdMetaobjectGID}`);
+    console.log(`Metafield GID: ${MetaField.id}`);
+    console.log(`Existing Metaobject GIDs: ${MetaField.metaobjects}`);
+    console.log(`Created Metaobject GID: ${MetaObject.id}`);
   
     // Add new ID to existing IDs
-    existingMetaobjectGIDs.push(createdMetaobjectGID);
-    let updatedMetaobjectGIDs = JSON.stringify(existingMetaobjectGIDs);
+    MetaField.metaobjects.push(MetaObject.id);
+    let updatedMetaobjectGIDs = JSON.stringify(MetaField.metaobjects);
     const escapedMetaobjectGIDs = updatedMetaobjectGIDs.replace(/"(.*?)"/g, `\\"$1\\"`);
   
     const query = `
@@ -171,7 +171,7 @@ async function linkRecipeToCustomer(customerGID, metafieldGID, existingMetaobjec
                 id: "${customerGID}",
                 metafields: [
                   {
-                    id: "${metafieldGID}"
+                    id: "${MetaField.id}"
                     value: "${escapedMetaobjectGIDs}"
                     }
                 ],
