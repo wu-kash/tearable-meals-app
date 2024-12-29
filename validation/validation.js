@@ -1,5 +1,6 @@
 import { getCustomerMetafields, getAllRecipes } from "../shopify/customer.js";
 import { getMetaobjectData } from "../shopify/metaobject.js";
+import { getGlobalID } from '../util/util.js'
 
 const recipeLimit = parseInt(process.env.MAX_CUSTOMER_RECIPES_FREE);
 
@@ -8,7 +9,7 @@ export async function canCreateRecipe(req, res) {
     const customerID = req.params.customerID;
     console.log(`Checking if customer '${customerID}' can create recipe`);
   
-    const customerGID =  `gid://shopify/Customer/${customerID}`;
+    const customerGID = getGlobalID('customer', customerID);
 
     const allRecipes = await getAllRecipes(customerGID);
     const customerRecipes = allRecipes.customer_recipes;
@@ -31,26 +32,31 @@ export async function isValidRecipe(req, res) {
     const customerID = req.params.customerID;
     console.log(`Checking if recipe ID is valid: ${recipeID}`);
 
-    const recipeGID =  `gid://shopify/Metaobject/${recipeID}`;
-    const customerGID =  `gid://shopify/Customer/${customerID}`;
+    const recipeGID =  getGlobalID('metaobject', recipeID);
+    const customerGID = getGlobalID('customer', customerID);
 
-    const [metafieldGID, existingMetaobjectGIDs] = await getCustomerMetafields(customerGID, 'customer_recipe');
+    const allRecipes = await getAllRecipes(customerGID);
 
-    if (existingMetaobjectGIDs.includes(recipeGID)) {
-    console.log('Recipe ID exists for customer ID'); 
-    const recipeData = await getMetaobjectData(recipeGID);
+    let isValidRecipeID = false;
+    let recipeData = null;
+    if (allRecipes.customer_recipes.metaobjects_gid.includes(recipeGID)) {
+        console.log(`Recipe ID exists for customer ID as '${allRecipes.customer_recipes.type}'`); 
+        isValidRecipeID = true;
+        
+    } else if (allRecipes.generated_recipes.metaobjects_gid.includes(recipeGID)) {
+        console.log(`Recipe ID exists for customer ID as '${allRecipes.generated_recipes.type}'`); 
+        isValidRecipeID = true;
+    } else {
+        console.log('[ERROR] Recipe ID does not exist for customer ID');
+    }
+
+    if (isValidRecipeID) {
+        recipeData = await getMetaobjectData(recipeGID);
+    }
 
     res.json({ 
-        isValidRecipeID: true,
+        isValidRecipeID: isValidRecipeID,
         recipeData: recipeData 
     });
 
-    } else {
-    console.log('[ERROR] Recipe ID does not exist for customer ID');
-    
-    res.json({ 
-        isValidRecipeID: false,
-        recipeData: null 
-    });
-    }
 };

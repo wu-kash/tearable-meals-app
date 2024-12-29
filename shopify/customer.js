@@ -5,7 +5,6 @@ const recipeLimit = parseInt(process.env.MAX_CUSTOMER_RECIPES_FREE);
 export async function getCustomerMetafields(customerGID, recipeType) {
 
     const useMetafieldKey = `custom.${recipeType}s`;
-    // customerGID: "gid://shopify/Customer/<id>"
   
     console.log(`Getting customer '${customerGID}' Metafields`);
     const query = `
