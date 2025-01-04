@@ -1,31 +1,8 @@
-import pdf from "pdf-creator-node";
-import { promises as fsP } from 'fs';
-import fs from 'fs';
+import puppeteer from "puppeteer";
+import ejs from 'ejs';
 
 import { getGlobalID } from '../util/util.js'
 import { queryMetaObject } from '../shopify/query.js'
-
-var html = fs.readFileSync("./print/template.html", "utf8");
-
-
-var options = {
-    format: "A4",
-    orientation: "portrait",
-    border: "10mm"
-    // header: {
-    //     height: "45mm",
-    //     contents: '<div style="text-align: center;">Author: Shyam Hajare</div>'
-    // },
-    // footer: {
-    //     height: "28mm",
-    //     contents: {
-    //         first: 'Cover page',
-    //         2: 'Second page', // Any page number is working. 1-based index
-    //         default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
-    //         last: 'Last Page'
-    //     }
-    // }
-};
 
 export async function printCustomerRecipe(req, res) {
 
@@ -42,28 +19,7 @@ export async function printCustomerRecipe(req, res) {
     const outputFile = `${outputName}.pdf`;
     const outputPdfPath = `./print/output/${outputFile}`;
 
-    var document = {
-        html: html,
-        data: {
-          recipeData: MetaObject,
-        },
-        path: outputPdfPath,
-        type: "",
-      };
-
-    // const pdfOutput = await pdf.create(document, options);
-
-    await pdf
-        .create(document, options)
-        .then((res) => {
-            console.log(res);
-            
-    })
-        .catch((error) => {
-            console.error(error);
-    });
-
-    await waitForFile(outputPdfPath);
+    await generatePdf(MetaObject, outputPdfPath);
 
     res.download(outputPdfPath, outputFile, (err) => {
         if (err) {
@@ -81,14 +37,24 @@ export async function printCustomerRecipe(req, res) {
     // });
 }
 
-async function waitForFile(filePath, interval = 1000) {
-    while (true) {
-      try {
-        await fsP.access(filePath);
-        console.log(`${filePath} is ready.`);
-        break;
-      } catch {
-        await new Promise(resolve => setTimeout(resolve, interval));
-      }
+async function generatePdf(recipeData, outputPath) {
+    try {
+        // Render the template with dynamic data
+        const html = await ejs.renderFile('./print/templateRecipe.ejs', { recipeData });
+        // Launch Puppeteer to generate the PDF
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+
+        // Set the HTML content to the rendered template
+        await page.setContent(html);
+
+        // Generate and save the PDF
+        await page.pdf({ path: outputPath, format: 'A4' });
+
+        await browser.close();
+
+        console.log(`PDF for ${recipeData.title} generated successfully!`);
+    } catch (error) {
+        console.error('Error generating PDF:', error);
     }
-  };
+}

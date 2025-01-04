@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title><%= recipeData.title %></title>
+    </head>
+    <h2 class="recipe-headings main-heading"><strong><%= recipeData.title %></strong></h2>
+
+    <div class="div-main-content-info">
+        <div class="div-main-content-info-text">
+            <div id="portionsContainer" class="div-main-content-info-text-row">
+                <span id="recipe-info-portions"><%= recipeData.portions %></span>
+            </div>
+            <div id="preparationTimeContainer" class="div-main-content-info-text-row">
+                <span id="recipe-info-preparation-time"><%= recipeData.preparation_time.value %>, <%= recipeData.preparation_time.unit %></span>
+            </div>
+            <div id="cookingTimeContainer" class="div-main-content-info-text-row">
+                <span id="recipe-info-cooking-time"><%= recipeData.cooking_time.value %>, <%= recipeData.cooking_time.unit %></span>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="div-main-content-ingredients">
+        <h3 class="recipe-headings sub-heading">Ingredients</h3>
+        <ul class="recipe-ingredient-list">
+            <% recipeData.ingredients.forEach(function(ingredient) { %>
+                <li><%= ingredient.name %>, <%= ingredient.value %><, <%= ingredient.unit %><</li>
+            <% }); %>
+        </ul>
+    </div>
+
+    <div class="div-main-content-preparation-steps">
+        <h3 class="recipe-headings sub-heading">Preparation</h3>
+        <ul class="recipe-preparation-list">
+            <% recipeData.preparation_steps.forEach(function(step) { %>
+                <li><%= step %></li>
+            <% }); %>
+        </ul>
+    </div>
+
+    <div class="div-main-content-cooking-steps">
+        <h3 class="recipe-headings sub-heading">Cooking</h3>
+        <ul class="recipe-cooking-list">
+            <% recipeData.cooking_steps.forEach(function(step) { %>
+                <li><%= step %></li>
+            <% }); %>
+        </ul>
+    </div>
+</html>
+
+
+
+
+
