@@ -42,7 +42,7 @@ async function generatePdf(recipeData, outputPath) {
         // Render the template with dynamic data
         const html = await ejs.renderFile('./print/templateRecipe.ejs', { recipeData });
         // Launch Puppeteer to generate the PDF
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({ headless: "new" });
         const page = await browser.newPage();
 
         // Set the HTML content to the rendered template
