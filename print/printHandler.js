@@ -1,5 +1,5 @@
-import puppeteer from "puppeteer";
 import ejs from 'ejs';
+import pdf from 'html-pdf-node';
 
 import { getGlobalID } from '../util/util.js'
 import { queryMetaObject } from '../shopify/query.js'
@@ -15,45 +15,28 @@ export async function printCustomerRecipe(req, res) {
 
     console.log(`Printing recipe ID '${recipeID} for customer ID '${customerID}`);
 
-    const outputName = `${MetaObject.title}`.replaceAll(' ', '_');
-    const outputFile = `${outputName}.pdf`;
-    const outputPdfPath = `./print/output/${outputFile}`;
+    const outputName = `${MetaObject.title.replace(/\s+/g, '_')}.pdf`;
+    const pdfBuffer = await generatePdf(MetaObject);
 
-    await generatePdf(MetaObject, outputPdfPath);
+    // Set the response headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${outputName}"`
+    );
+    res.send(pdfBuffer);
 
-    res.download(outputPdfPath, outputFile, (err) => {
-        if (err) {
-            console.error('Error: Unable to download the PDF file')
-            console.log(err)
-        }
-    });
-    
-    // fs.unlink(outputPdfPath, (err) => {
-    //     if (err) {
-    //         console.error(`Error removing file: ${err}`);
-    //         return;
-    //     }
-    //     console.log(`File ${outputPdfPath} has been successfully removed.`);
-    // });
 }
 
-async function generatePdf(recipeData, outputPath) {
+async function generatePdf(recipeData) {
     try {
         // Render the template with dynamic data
         const html = await ejs.renderFile('./print/templateRecipe.ejs', { recipeData });
-        // Launch Puppeteer to generate the PDF
-        const browser = await puppeteer.launch({ headless: "new" });
-        const page = await browser.newPage();
-
-        // Set the HTML content to the rendered template
-        await page.setContent(html);
-
-        // Generate and save the PDF
-        await page.pdf({ path: outputPath, format: 'A4' });
-
-        await browser.close();
-
+        const pdfBuffer = await pdf.generatePdf({ content: html }, { format: 'A4' });
+        
         console.log(`PDF for ${recipeData.title} generated successfully!`);
+
+        return pdfBuffer;
     } catch (error) {
         console.error('Error generating PDF:', error);
     }
