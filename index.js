@@ -7,6 +7,7 @@ dotenv.config();
 
 import { canCreateRecipe, isValidRecipe } from './validation/validation.js';
 import { createCustomerRecipe, deleteCustomerRecipe, updateCustomerRecipe } from './user/recipeHandler.js';
+import { printCustomerRecipe } from './print/printHandler.js';
 import { aiGenerateUrlRecipe, aiGenerateIngredientRecipe } from './alessio/processing.js';
 
 //https://shopify.dev/docs/api/admin-graphql/2024-10/mutations/metaobjectCreate
@@ -28,6 +29,7 @@ app.get('/isValidRID/:customerID/:recipeID', isValidRecipe);
 app.post('/create_customer_recipe', createCustomerRecipe);
 app.post('/update_customer_recipe', updateCustomerRecipe);
 app.post('/delete_customer_recipe', deleteCustomerRecipe);
+app.post('/print_customer_recipe', printCustomerRecipe);
 
 // AI Processing
 app.post('/generate_url_recipe', aiGenerateUrlRecipe);

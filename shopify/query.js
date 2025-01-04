@@ -8,6 +8,7 @@ export async function queryMetaObject(metaobjectGID) {
     const query = `
     query  {
         metaobject(id: "${metaobjectGID}") {
+          type
           fields {
               key
               value
@@ -27,6 +28,42 @@ export async function queryMetaObject(metaobjectGID) {
         acc[field.key] = field.value;
         return acc;
       }, {});
+
+      const processedIngredients = [];
+      JSON.parse(MetaObject.ingredients).forEach(ingredient => {
+        var ingredientParts = ingredient.split(",").map(function(item) {
+          return item.trim();
+        });
+        // Name, Quantity, Units
+        const ingredientObj = {
+          'name': ingredientParts[0],
+          'value': ingredientParts[1],
+          'unit': ingredientParts[2],
+        }
+        processedIngredients.push(ingredientObj)
+    });
+
+    var preparationTimeParts = MetaObject.preparation_time.split(",").map(function(item) {
+      return item.trim();
+    });
+
+      MetaObject.preparation_time = {
+        'value': preparationTimeParts[0],
+        'unit': preparationTimeParts[1],
+      }
+
+      var cookingTimeParts = MetaObject.cooking_time.split(",").map(function(item) {
+        return item.trim();
+      });
+
+      MetaObject.cooking_time = {
+        'value': cookingTimeParts[0],
+        'unit': cookingTimeParts[1],
+      }
+
+      MetaObject.ingredients = processedIngredients;
+      MetaObject.preparation_steps = JSON.parse(MetaObject.preparation_steps);
+      MetaObject.cooking_steps = JSON.parse(MetaObject.cooking_steps);
 
       return MetaObject;
     } catch(err) {
