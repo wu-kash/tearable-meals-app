@@ -95,12 +95,9 @@ async function runPrompt(inputType, inputMessage) {
 
 	// Post process
 	recipeData.portions = `${recipeData.portions}`;
-	recipeData.preparation_time = `${recipeData.preparation_time.value}, ${recipeData.preparation_time.unit}`;
-	recipeData.cooking_time = `${recipeData.cooking_time.value}, ${recipeData.cooking_time.unit}`;
-	const processedIngredients = recipeData.ingredients.map(
-			item => `${toTitleCase(item.name)}, ${item.value}, ${item.unit}`
-	);
-	recipeData.ingredients = processedIngredients;
+	recipeData.preparation_time.value = `${recipeData.preparation_time.value}`;
+	recipeData.cooking_time.value = `${recipeData.cooking_time.value}`;
+
  
 	if (inputType == INPUT_URL) {
 		recipeData.source = inputMessage;
@@ -108,6 +105,7 @@ async function runPrompt(inputType, inputMessage) {
 		recipeData.source = 'Alessio';
 	}
 
+	recipeData.origin = 'ai-generated';
 	console.log(recipeData);
 
 	return recipeData
@@ -125,7 +123,7 @@ export async function aiGenerateUrlRecipe(req, res) {
 
 		const recipeData = await runPrompt(INPUT_URL, url);
 
-		await createAndLinkCustomerRecipe(recipeData, customerGID, 'generated_recipe');
+		const Metaobject = await createAndLinkCustomerRecipe(recipeData, customerGID);
 
 		const responseMessage = {
 				success: true,
@@ -148,14 +146,13 @@ export async function aiGenerateIngredientRecipe(req, res) {
 		ingredients.forEach(ingredient => {
 				console.log(ingredient);
 		});
-		const messageRole = 'user';
 		const ingredientsString = `${JSON.stringify(ingredients)}`
 		const ingredientsListString = ingredientsString.substring(1, ingredientsString.length-1).replaceAll('\"', ''); // Remove [] surrounding string and quote marks
 		const customerGID = getGlobalID('customer', customerID);
 
 		const recipeData = await runPrompt(INPUT_ING, ingredientsListString);
 
-		await createAndLinkCustomerRecipe(recipeData, customerGID, 'generated_recipe');
+		const Metaobject = await createAndLinkCustomerRecipe(recipeData, customerGID);
 
 		const responseMessage = {
 				success: true,

@@ -1,4 +1,4 @@
-import { getAllRecipes } from "../shopify/customer.js";
+import { getCustomerRecipes } from "../shopify/customer.js";
 import { queryMetaObject } from "../shopify/query.js";
 import { getGlobalID } from '../util/util.js'
 
@@ -11,15 +11,11 @@ export async function canCreateRecipe(req, res) {
   
     const customerGID = getGlobalID('customer', customerID);
 
-    const allRecipes = await getAllRecipes(customerGID);
-    const customerRecipes = allRecipes.customer_recipes;
-    const generatedRecipes = allRecipes.generated_recipes;
+    const customerRecipes = await getCustomerRecipes(customerGID);
   
     res.json({ 
       canCreateRecipe: customerRecipes.can_create,
       numCustomerRecipes: customerRecipes.num_recipes,
-      canGenerateRecipe: generatedRecipes.can_create,
-      numGeneratedRecipes: generatedRecipes.num_recipes,
       recipeLimit: recipeLimit
     });
   
@@ -33,16 +29,12 @@ export async function isValidRecipe(req, res) {
     const recipeGID =  getGlobalID('metaobject', recipeID);
     const customerGID = getGlobalID('customer', customerID);
 
-    const allRecipes = await getAllRecipes(customerGID);
+    const customerRecipes = await getCustomerRecipes(customerGID);
 
     let isValidRecipeID = false;
     let recipeData = null;
-    if (allRecipes.customer_recipes.metaobjects_gid.includes(recipeGID)) {
-        console.log(`Recipe ID exists for customer ID as '${allRecipes.customer_recipes.type}'`); 
-        isValidRecipeID = true;
-        
-    } else if (allRecipes.generated_recipes.metaobjects_gid.includes(recipeGID)) {
-        console.log(`Recipe ID exists for customer ID as '${allRecipes.generated_recipes.type}'`); 
+    if (customerRecipes.metaobjects_gid.includes(recipeGID)) {
+        console.log(`Recipe ID exists for customer ID as '${customerRecipes.type}'`); 
         isValidRecipeID = true;
     } else {
         console.log('[ERROR] Recipe ID does not exist for customer ID');

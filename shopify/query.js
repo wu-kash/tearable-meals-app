@@ -24,48 +24,17 @@ export async function queryMetaObject(metaobjectGID) {
       const fields = response.metaobject.fields
 
       // Take the fields array and process into dictionary
-      const MetaObject = fields.reduce((acc, field) => {
-        acc[field.key] = field.value;
+      const Metaobject = fields.reduce((acc, field) => {
+        try {
+          acc[field.key] = JSON.parse(field.value);
+        } catch {
+          acc[field.key] = field.value;
+        }
+        
         return acc;
       }, {});
 
-      const processedIngredients = [];
-      JSON.parse(MetaObject.ingredients).forEach(ingredient => {
-        var ingredientParts = ingredient.split(",").map(function(item) {
-          return item.trim();
-        });
-        // Name, Quantity, Units
-        const ingredientObj = {
-          'name': ingredientParts[0],
-          'value': ingredientParts[1],
-          'unit': ingredientParts[2],
-        }
-        processedIngredients.push(ingredientObj)
-    });
-
-    var preparationTimeParts = MetaObject.preparation_time.split(",").map(function(item) {
-      return item.trim();
-    });
-
-      MetaObject.preparation_time = {
-        'value': preparationTimeParts[0],
-        'unit': preparationTimeParts[1],
-      }
-
-      var cookingTimeParts = MetaObject.cooking_time.split(",").map(function(item) {
-        return item.trim();
-      });
-
-      MetaObject.cooking_time = {
-        'value': cookingTimeParts[0],
-        'unit': cookingTimeParts[1],
-      }
-
-      MetaObject.ingredients = processedIngredients;
-      MetaObject.preparation_steps = JSON.parse(MetaObject.preparation_steps);
-      MetaObject.cooking_steps = JSON.parse(MetaObject.cooking_steps);
-
-      return MetaObject;
+      return Metaobject;
     } catch(err) {
       console.error(err);
       throw err;
@@ -74,7 +43,7 @@ export async function queryMetaObject(metaobjectGID) {
 
 export async function queryCustomerMetaField(customerGID, metafieldKey) {
 
-    const useMetafieldKey = `custom.${metafieldKey}s`;
+    const useMetafieldKey = `custom.${metafieldKey}`;
     console.log(`Getting customer '${customerGID}' metafield key: ${useMetafieldKey}`);
 
     const query = `
@@ -99,25 +68,35 @@ export async function queryCustomerMetaField(customerGID, metafieldKey) {
   
     try {
       const response = await shopify.graphql(query, variables);
+
+      const customer = response.customer;
+      if (customer) {
+        if ( response.customer.metafields.edges.length > 0 ) {
+          const customerRecipeMetafieldID = response.customer.metafields.edges[0].node.id;
+          const customerMetaobjectIDs = JSON.parse(response.customer.metafields.edges[0].node.value);
+          console.log(`Customer Recipe Metafield ID '${customerRecipeMetafieldID}'`);
+          console.log(`Customer Metaobject IDs:`);
+          console.log(customerMetaobjectIDs);
   
-      if ( response.customer.metafields.edges.length > 0 ) {
-        const customerRecipeMetafieldID = response.customer.metafields.edges[0].node.id;
-        const customerMetaobjectIDs = JSON.parse(response.customer.metafields.edges[0].node.value);
-        console.log(`Customer Recipe Metafield ID '${customerRecipeMetafieldID}'`);
-        console.log(`Customer Metaobject IDs:`);
-        console.log(customerMetaobjectIDs);
+          const MetaFields = {
+              type: useMetafieldKey,
+              id: customerRecipeMetafieldID,
+              metaobjects: customerMetaobjectIDs
+          }
+  
+          return MetaFields;
+        } else {
+          console.warn(`No existing '${useMetafieldKey}' metafields found`);
 
-        const MetaFields = {
-            type: useMetafieldKey,
-            id: customerRecipeMetafieldID,
-            metaobjects: customerMetaobjectIDs
+          return null;
         }
-
-        return MetaFields;
-      } else {
-        console.log(`No existing ${useMetafieldKey} metafields found`);
-        return null;
       }
+    else {
+      console.log('Customer does not exist')
+      return null;
+    }
+  
+      
     } catch(err) {
       console.error(err);
       throw err;

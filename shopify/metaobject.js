@@ -1,5 +1,5 @@
 import { shopify } from './shopify.js';
-import { getGlobalID } from "../util/util.js";
+import { recipeDataToFieldsArray } from '../util/recipe.js';
 
 export async function createMetaobjectRecipe(recipeData, recipeType) {
 
@@ -28,16 +28,7 @@ export async function createMetaobjectRecipe(recipeData, recipeType) {
 	const variables = {
 		metaobject: {
 		type: recipeType,
-		fields: [
-			{ key: "title", value: recipeData.title },
-			{ key: "source", value: recipeData.source },
-			{ key: "portions", value: recipeData.portions },
-			{ key: "preparation_time", value: recipeData.preparation_time },
-			{ key: "cooking_time", value: recipeData.cooking_time },
-			{ key: "ingredients", value: JSON.stringify(recipeData.ingredients) },
-			{ key: "preparation_steps", value: JSON.stringify(recipeData.preparation_steps) },
-			{ key: "cooking_steps", value: JSON.stringify(recipeData.cooking_steps) },
-		],
+		fields: recipeDataToFieldsArray(recipeData),
 		}
 	};
 

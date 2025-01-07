@@ -6,8 +6,6 @@ import fs from 'fs';
 import { getGlobalID } from '../util/util.js'
 import { queryMetaObject } from '../shopify/query.js'
 
-
-
 // Load environment variables
 dotenv.config();
 
@@ -19,8 +17,6 @@ export async function printCustomerRecipe(req, res) {
 
     const MetaObject = await queryMetaObject(recipeGID);
     console.log(MetaObject);
-
-    
 
     console.log(`Printing recipe ID '${recipeID} for customer ID '${customerID}`);
 
@@ -38,26 +34,36 @@ export async function printCustomerRecipe(req, res) {
         `attachment; filename="${outputFile}"`
     );
     res.send(pdfBuffer);
-
 }
 
 async function generatePdf(recipeData, outputDir, fileName) {
-    try {
-        // Render the template with dynamic data
-        const html = await ejs.renderFile('./print/templateRecipe.ejs', { recipeData });
-        const browser = await puppeteer.connect({ browserWSEndpoint: process.env.BROWSER_WS_ENDPOINT });
-        const page = await browser.newPage();
 
-        // Set the HTML content
+    try {
+        const html = await ejs.renderFile('./print/templateRecipe.ejs', { recipeData });
+
+        if (process.env.ENV == "DEV" ) {
+            console.debug('[DEBUG] Using local browser')
+            var browser = await puppeteer.launch({
+                executablePath: 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
+        });
+        } else {
+            var browser = await puppeteer.connect({ browserWSEndpoint: process.env.BROWSER_WS_ENDPOINT });
+        }
+
+        const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'load' });
-        fs.writeFileSync(`${outputDir}/debug_${fileName}.html`, html);
-        // const pdfBuffer = await page.pdf({  path: `${outputDir}/${fileName}.pdf`, format: 'A4' });
         const pdfBuffer = await page.pdf({ format: 'A4' });
-        fs.writeFileSync(`${outputDir}/debug_${fileName}.pdf`, pdfBuffer);
+
+        if (process.env.ENV == "DEV" ) {
+            console.debug(`[DEBUG] Generating debug files: ${outputDir}`);
+            fs.writeFileSync(`${outputDir}/debug_${fileName}.html`, html);
+            fs.writeFileSync(`${outputDir}/debug_${fileName}.pdf`, pdfBuffer);
+        } 
 
         console.log(`PDF for ${recipeData.title} generated successfully!`);
 
         return Buffer.from(pdfBuffer);
+        
     } catch (error) {
         console.error('Error generating PDF:', error);
     }

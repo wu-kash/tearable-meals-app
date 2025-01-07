@@ -10,6 +10,7 @@ import { createCustomerRecipe, deleteCustomerRecipe, updateCustomerRecipe } from
 import { printCustomerRecipe } from './print/printHandler.js';
 import { aiGenerateUrlRecipe, aiGenerateIngredientRecipe } from './alessio/processing.js';
 
+
 //https://shopify.dev/docs/api/admin-graphql/2024-10/mutations/metaobjectCreate
 
 const app = express();
@@ -17,7 +18,8 @@ const PORT = process.env.PORT || 4000;
 
 // Middleware
 app.use(cors({
-	origin: 'https://www.tearablemeals.com', // Replace with your Shopify domain
+	// origin: 'https://www.tearablemeals.com', // Replace with your Shopify domain
+	origin: 'https://bzpg1u-2y.myshopify.com', // Replace with your Shopify domain
 }));
 app.use(express.json()); // To parse JSON request bodies
 
