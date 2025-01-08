@@ -10,8 +10,8 @@ var ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN;
 
 
 
-SHOPIFY_STORE_NAME = 'bzpg1u-2y.myshopify.com'
-ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN_V2;
+var SHOPIFY_STORE_NAME = 'bzpg1u-2y.myshopify.com'
+var ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN_V2;
 
 var SHOPIFY_ADMIN_URL = `https://${SHOPIFY_STORE_NAME}/admin/api/${API_VERSION}/graphql.json`;
 
