@@ -5,13 +5,8 @@ dotenv.config();
 
 const API_VERSION = '2024-10';
 
-var SHOPIFY_STORE_NAME = 'txtd4m-5u.myshopify.com'
-var ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN;
-
-
-
 var SHOPIFY_STORE_NAME = 'bzpg1u-2y.myshopify.com'
-var ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN_V2;
+var ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN;
 
 var SHOPIFY_ADMIN_URL = `https://${SHOPIFY_STORE_NAME}/admin/api/${API_VERSION}/graphql.json`;
 
