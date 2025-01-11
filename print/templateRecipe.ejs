@@ -3,178 +3,15 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="../styles.css">
         <link href='https://fonts.googleapis.com/css?family=JetBrains Mono' rel='stylesheet'>
         <title><%= recipeData.title %></title>
-        <style>
-            :root {
-                --qr-height: 2cm;
-                --width-ingredients: fit-content;
-                --h2-border-width: 0.1em; 
-                --default-font-size: 0.75em;
-                --margin-under-recipe-heading: 0.5em;
-                --margin-after-section: 0.5em;
-            }
 
-            * { 
-                margin: 0; 
-                padding: 0; 
-            }
-
-            html *{
-                font-family: 'JetBrains Mono', monospace;
-            }
-
-            .h1-titles {
-                border-style: solid;
-                border-left: 0;
-                border-right: 0;
-                border-width: 0.15em;
-                font-size: 1.5em;
-                text-transform: uppercase;
-                margin-bottom: var(--margin-under-recipe-heading);
-            }
-
-            .h2-titles {
-                text-transform: uppercase;
-                color: orange;
-                font-size: 1.25em;
-                letter-spacing: 1px;
-                padding: 2px;
-                border-style: solid;
-                border-width: var(--h2-border-width); /* The width is set later in recipe.js. Doing it like this fixes the random gap in with in the Cooking heading borders ... */
-                border-left: 0cm;
-                border-right: 0cm;
-                width: fit-content;
-                margin-bottom: var(--margin-under-recipe-heading);
-            }
-
-            .div-recipe-info {
-                display: flex;
-                align-items: center;
-            }
-
-            .div-recipe-info-text {
-                display: grid;
-                grid-template-columns: auto 1fr;
-                align-items: center;
-                height: var(--qr-height);
-                padding: 0.5em;
-            }
-
-            .div-recipe-info-text-row {
-                display: contents;
-            }
-
-            .img-recipe-info-text-symbol {
-                margin-right: 0.5em;
-                align-self: center;
-                height: 1em;
-                background: transparent;
-                justify-self: right;
-            }
-
-            .div-heading-container {
-                display: flex;
-                align-items: baseline;
-            }
-        </style>
-
-
+        <%- recipeCss.style %>
     </head>
 
+    
+
     <body>
-        <script>
-            function formatIngredient(ingredientName, amount=null, units=null) {
-
-                /* NOTE The margin-right is added to seperate the ingredients from the steps on the right */
-                if (amount==null || amount=='') {
-                    return `${ingredientName}`;
-                } else if (units==null || units=='') {
-                    return `${ingredientName} <span style="font-size: 0.75em; margin-right: 1em;">(${amount})</span>`;
-                } else {
-                    return `${ingredientName} <span style="font-size: 0.75em; margin-right: 1em;">(${amount} ${units})</span>`;
-                }
-            }
-
-            function processText(text, unitPreference) {
-
-                const stylingStart = `<span>`;
-                const stylingEnd = `</span>`;
-
-                // tempFToC{ValueF}
-                const regexTempFToC = /tempFToC\{(\d+)\}/g;
-                text = text.replace(regexTempFToC, (match, p1) => {
-                    let fahrenheit = parseFloat(p1);
-                    let celsius = fahrenheit;
-                    let units = '';
-                    [celsius, units] = convertValues(fahrenheit, 'F', unitPreference);
-                
-                    return `${stylingStart}${celsius}°${units}${stylingEnd}`;
-                });
-
-                // tempC{ValueC}
-                const regexTempC = /tempC\{(\d+)\}/g;
-                text = text.replace(regexTempC, (match, p1) => {
-                    let celsius = parseFloat(p1);
-                    let fahrenheit = celsius;
-                    let units = '';
-                    [celsius, units] = convertValues(celsius, 'C', unitPreference);
-                    return `${stylingStart}${celsius}°${units}${stylingEnd}`;
-                });
-
-                // FRACTION{Value1}{Value2}
-                const fracRegex = /FRACTION\{(\d+)\}\{(\d+)\}/g;
-                text = text.replace(fracRegex, (match, numerator, denominator) => {
-                    // return `<sup>${numerator}</sup>&frasl;<sub>${denominator}</sub>`;
-                    // return `&frac${numerator}${denominator}`;
-
-                    return `<sup>${numerator}</sup>&#x2044;<sub>${denominator}</sub>`;  
-                });
-
-                // INGREDIENT{text}
-                const ingredientRegex = /INGREDIENT\{(.*?)\}/g;
-                text = text.replace(ingredientRegex, (match, ingredient) => {
-                    return `<b>${ingredient}</b>`;
-                });
-
-                return text;
-            }
-
-            function addIngredientToList(ingredientName, amount, units, unitPreference) {
-
-                var formattedIngredient = ''
-                if (amount==null || amount=='') {
-                    formattedIngredient = `${ingredientName}`;
-                } else if (units==null || units=='') {
-                    formattedIngredient = `${ingredientName} <span style="font-size: 0.75em; margin-right: 1em;">(${amount})</span>`;
-                } else {
-                    formattedIngredient = `${ingredientName} <span style="font-size: 0.75em; margin-right: 1em;">(${amount} ${units})</span>`;
-                }
-                const li = document.createElement('li');
-                li.className = 'text-ingredient-item';
-                li.innerHTML = processText(formattedIngredient);
-                document.getElementById('ingredientList').appendChild(li);
-            }
-
-            function addPreparationStepToList(step) {
-                const li = document.createElement('li');
-                li.className = 'preparation-step';
-                li.id = 'step-text';
-                li.textContent = step;
-                document.getElementById('preparationList').appendChild(li);
-            }
-
-            function addCookingStepToList(step) {
-                const li = document.createElement('li');
-                li.className = 'cooking-step';
-                li.id = 'step-text';
-                li.textContent = step;
-                document.getElementById('cookingList').appendChild(li);
-            }
-
-        </script>
-
         <div class="div-heading-recipe">
             <h1 class="h1-titles" id="recipe-title"><%= recipeData.title %></h1>
         </div>
@@ -182,62 +19,64 @@
         <div class="div-recipe-info">
             <div class="div-recipe-info-text">
                 <div class="div-recipe-info-text-row">
-                    <img src="images/symbol_portions.png" alt="logo" class="img-recipe-info-text-symbol">
+                    <img src="https://cdn.shopify.com/s/files/1/0917/9286/7628/files/content_recipe_symbol_portions.png?v=1736098366" alt="logo" class="img-recipe-info-text-symbol">
                     <span id="recipe-portions"><%= recipeData.portions %> Servings</span>
                 </div>
                 <div class="div-recipe-info-text-row">
-                    <img src="images/symbol_preparation.png" alt="logo" class="img-recipe-info-text-symbol">
+                    <img src="https://cdn.shopify.com/s/files/1/0917/9286/7628/files/content_recipe_symbol_preparation.png?v=1736098355" alt="logo" class="img-recipe-info-text-symbol">
                     <span id="recipe-preparation-time"><%= recipeData.preparation_time.value %> <%= recipeData.preparation_time.unit %></span>
                 </div>
                 <div class="div-recipe-info-text-row">
-                    <img src="images/symbol_cooking.png" alt="logo" class="img-recipe-info-text-symbol">
+                    <img src="https://cdn.shopify.com/s/files/1/0917/9286/7628/files/content_recipe_symbol_cooking.png?v=1736098343" alt="logo" class="img-recipe-info-text-symbol">
                     <span id="recipe-cooking-time"><%= recipeData.cooking_time.value %> <%= recipeData.cooking_time.unit %></span>
                 </div>
             </div>
         </div>
 
         <div class="container">
-            
+            <div class="container">
             <div class="div-heading-container">
                 <div>
                     <h2 id="title-ingredients" class="h2-titles">Ingredients</h2>
                 </div>
                 <h2 id="title-preparation" class="h2-titles">Preparation</h2>
             </div>
-
             <div class="div-ingredients">
                 <ul class="text-ingredient-list" id="ingredientList">
-                    <script>
-                        <% recipeData.ingredients.forEach(function(ingredient) { %>
-                        addIngredientToList("<%= ingredient.name %>", "<%= ingredient.value %>", "<%= ingredient.unit %>");
-                        <% }); %>
-                    </script>
+   
                 </ul>
             </div>
-
             <div class="section-preparation">
                 <ul class="text-preparation-list" id="preparationList">
-                    <script>
-                        <% recipeData.preparation_steps.forEach(function(step) { %>
-                        addPreparationStepToList("<%= step %>");
-                        <% }); %>
-                    </script>
+     
                 </ul>
             </div>
-
             <div class="section-recipe">
                 <h2 id="title-instructions" class="h2-titles" style>Cooking</h2>
                 <ol class="text-instructions-list" id="cookingList">
-                    <script>
-                        <% recipeData.preparation_steps.forEach(function(step) { %>
-                        addCookingStepToList("<%= step %>");
-                        <% }); %>
-                    </script>
+
                 </ol>
             </div>
+        </div>
 
         </div>
 
+        
+        <script>
+            <%- recipeJs.script %>
+
+            <% recipeData.ingredients.forEach(function(ingredient) { %>
+            addIngredientToList("<%= ingredient.name %>", "<%= ingredient.value %>", "<%= ingredient.unit %>");
+            <% }); %>
+
+            <% recipeData.preparation_steps.forEach(function(step) { %>
+            addPreparationStepToList("<%= step %>");
+            <% }); %>
+
+            <% recipeData.cooking_steps.forEach(function(step) { %>
+            addCookingStepToList("<%= step %>");
+            <% }); %>
+        </script>
     </body>
 </html>
 

@@ -1,0 +1,170 @@
+<style>
+
+:root {
+    --qr-height: 2cm;
+    --width-ingredients: fit-content;
+    --h2-border-width: 0.1em; 
+    --default-font-size: 0.75em;
+    --margin-under-recipe-heading: 0.5em;
+    --margin-after-section: 0.5em;
+}
+
+* { 
+    margin: 0; 
+    padding: 0; 
+}
+
+html *{
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.p-text {
+    margin-bottom: var(--margin-under-recipe-heading);
+}
+
+body {
+    font-size: var(--default-font-size);
+    margin: 1em;
+    min-width: 360px; /* If you change this, change also in recipe.js min width by 1 pixel */
+}
+
+.h1-titles {
+    border-style: solid;
+    border-left: 0;
+    border-right: 0;
+    border-width: 0.15em;
+    font-size: 1.5em;
+    text-transform: uppercase;
+    margin-bottom: var(--margin-under-recipe-heading);
+}
+
+.h2-titles {
+    text-transform: uppercase;
+    color: orange;
+    font-size: 1.25em;
+    letter-spacing: 1px;
+    padding: 2px;
+    border-style: solid;
+    border-width: var(--h2-border-width); /* The width is set later in recipe.js. Doing it like this fixes the random gap in with in the Cooking heading borders ... */
+    border-left: 0cm;
+    border-right: 0cm;
+    width: fit-content;
+    margin-bottom: var(--margin-under-recipe-heading);
+}
+
+.div-recipe-info {
+    display: flex;
+    align-items: center;
+}
+
+.div-recipe-info-text {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    height: var(--qr-height);
+    padding: 0.5em;
+}
+
+.div-recipe-info-text-row {
+    display: contents;
+}
+
+.img-recipe-info-text-symbol {
+    margin-right: 0.5em;
+    align-self: center;
+    height: 1em;
+    background: transparent;
+    justify-self: right;
+}
+
+.div-heading-container {
+    display: flex;
+    align-items: baseline;
+}
+
+.div-ingredients {
+    float: left;
+    width: var(--width-ingredients);
+    margin-bottom: var(--margin-after-section);
+}
+
+ul.text-ingredient-list {
+    list-style: none;
+}
+
+li.text-ingredient-item {
+    line-height: 1.75;
+    max-height: 1.75;
+}
+
+li.text-ingredient-item:before {
+    content: "";
+    font-size: 0.75em;
+    font-weight: bold;
+    background-color: white;
+    border-color: orange;
+    border-width: 0.35em;
+    border-radius: 0.5em;
+    border-style: solid;
+    vertical-align: middle;
+    margin-right: 5px;
+    padding-top: 2px;
+    padding-right: 8px;
+    padding-bottom: 0px;
+    padding-left: 4px;
+}
+
+
+li.text-ingredient-heading {
+    text-transform: uppercase;
+    font-size: 1.25em;
+    font-weight: bold;
+    padding-top: 0.25em;
+}
+
+ul.text-preparation-list {
+    list-style-type: none;
+    margin-bottom: var(--margin-after-section);
+}
+
+li.preparation-step {}
+
+.text-instructions-list {
+    list-style: none;
+}
+
+.text-instructions-list li {
+    counter-increment: step-counter;
+    margin-bottom: 0.5em;
+}
+
+.text-instructions-list li::before {
+    content: counter(step-counter);
+    font-size: 0.75em;
+    margin-right: 2mm;
+    color: orange;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 10px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+
+@media print {
+
+    .noprint {
+       visibility: hidden;
+    }
+    
+    @page {
+        margin: 1em;
+    }   
+
+    .div-recipe-logo {
+        position: fixed;
+    }
+}
+
+
+</style>

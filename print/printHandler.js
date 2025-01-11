@@ -6,6 +6,16 @@ import fs from 'fs';
 import { getGlobalID } from '../util/util.js'
 import { queryMetaObject } from '../shopify/query.js'
 
+
+var recipeCss = {
+    style : fs.readFileSync('./public/styles.css','utf8')
+};
+
+var recipeJs = {
+    script : fs.readFileSync('./public/script.js','utf8')
+};
+
+
 // Load environment variables
 dotenv.config();
 
@@ -15,17 +25,7 @@ export async function printCustomerRecipe(req, res) {
     const customerID = req.body.customer_id;
     const recipeGID = getGlobalID('metaobject', recipeID);
 
-    const MetaObject = await queryMetaObject(recipeGID);
-    console.log(MetaObject);
-
-    console.log(`Printing recipe ID '${recipeID} for customer ID '${customerID}`);
-
-    const outputName = `${MetaObject.title}`.replaceAll(' ', '_');
-    const outputFile = `${outputName}.pdf`;
-    const outputDir = `./print/output`;
-    const outputPdfPath = `./print/output/${outputFile}`;
-
-    const pdfBuffer = await generatePdf(MetaObject, outputDir, outputName);
+    const [outputFile, pdfBuffer] = await printRecipe(customerID, recipeGID);
 
     // Set the response headers
     res.setHeader(
@@ -36,10 +36,33 @@ export async function printCustomerRecipe(req, res) {
     res.send(pdfBuffer);
 }
 
+export async function printRecipe(customerID, recipeGID) {
+
+    const MetaObject = await queryMetaObject(recipeGID);
+    console.log(MetaObject);
+
+    console.log(`Printing recipe ID '${recipeGID} for customer ID '${customerID}`);
+
+    const outputName = `${MetaObject.title}`.replaceAll(' ', '_');
+    const outputFile = `${outputName}.pdf`;
+    const outputDir = `./print/output`;
+
+    const pdfBuffer = await generatePdf(MetaObject, outputDir, outputName);
+
+    return [outputFile, pdfBuffer];
+
+};
+
 async function generatePdf(recipeData, outputDir, fileName) {
 
     try {
-        const html = await ejs.renderFile('./print/templateRecipe.ejs', { recipeData });
+        const html = await ejs.renderFile('./print/templateRecipe.ejs', 
+            { 
+                recipeData: recipeData, 
+                recipeCss: recipeCss,
+                recipeJs: recipeJs 
+            }
+        );
 
         if (process.env.ENV == "DEV" ) {
             console.debug('[DEBUG] Using local browser')
@@ -67,4 +90,4 @@ async function generatePdf(recipeData, outputDir, fileName) {
     } catch (error) {
         console.error('Error generating PDF:', error);
     }
-}
+};

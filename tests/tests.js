@@ -2,6 +2,7 @@ import { getGlobalID } from '../util/util.js';
 import { queryMetaObject, queryCustomerMetaField } from '../shopify/query.js';
 import { createMetaobjectRecipe} from '../shopify/metaobject.js'
 import { linkRecipeToCustomer } from '../user/recipeHandler.js'
+import { printRecipe } from '../print/printHandler.js';
 
 const recipeData = {
         title: "Another Test Recipe",
@@ -91,6 +92,8 @@ var metaobject_id = '';
 var metaobject_gid = '';
 var customer_id = '';
 var customer_gid = '';
+var recipe_id = '';
+var recipe_gid = '';
 
 
 // const metaobject_id = '105645310252'; // Test Recipe
@@ -118,14 +121,23 @@ customer_gid = getGlobalID('Customer', customer_id);
 
 ////// Create and Link a metaobject to a customer
 
-recipeType = 'customer_recipe';
-recipeData.title = 'My Customer Recipe'
-const Metaobject = await createMetaobjectRecipe(recipeData, recipeType)
+// recipeType = 'customer_recipe';
+// recipeData.title = 'My Customer Recipe'
+// const Metaobject = await createMetaobjectRecipe(recipeData, recipeType)
 
+// customer_id = '8645581308204';
+// customer_gid = getGlobalID('Customer', customer_id);
+// metaobject_gid = Metaobject.id;
+// await linkRecipeToCustomer(customer_gid, metaobject_gid)
+
+
+///////// Print Metaobject
+
+recipe_id = '106343465260';
+recipe_gid = getGlobalID('Metaobject', recipe_id);
 customer_id = '8645581308204';
 customer_gid = getGlobalID('Customer', customer_id);
-metaobject_gid = Metaobject.id;
-await linkRecipeToCustomer(customer_gid, metaobject_gid)
+await printRecipe(customer_gid, recipe_gid);
 
 console.log('Done');
 
