@@ -38,6 +38,8 @@ export async function printCustomerRecipe(req, res) {
 
 export async function printRecipe(customerID, recipeGID) {
 
+    ejs.clearCache();
+
     const MetaObject = await queryMetaObject(recipeGID);
     console.log(MetaObject);
 
