@@ -1,5 +1,5 @@
-import Shopify from 'shopify-api-node';
 import dotenv from 'dotenv';
+import Shopify from 'shopify-api-node';
 
 dotenv.config();
 

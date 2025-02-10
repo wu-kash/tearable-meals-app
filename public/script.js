@@ -271,8 +271,6 @@ window.onload = function() {
 
 };
 
-
-
 function toTitleCase(str) {
     return str.replace(
       /\w\S*/g,
@@ -282,14 +280,31 @@ function toTitleCase(str) {
 
 function generateUrlQr(url) {
 
-    QRCode.toDataURL(url, (err, dataUrl) => {
-        if (err) {
-            console.error("Error generating QR Code:", err);
-            return;
+    if (url) {
+        // Add 'https://' if the user doesn't provide it
+        if (!url.match(/^https?:\/\//)) {
+            url = `https://${url}`;
         }
-        document.getElementById("qr-code").src = dataUrl;
+
+        // Generate QR code as a data URL
+        const qrCode = new QRCode(document.createElement('div'), {
+            text: url,
+            width: 200,
+            height: 200,
+        });
+
         document.getElementById('qr-link').href =  `${url}`;
-    });
+
+        setTimeout(() => {
+            const canvas = qrCode._el.querySelector('canvas');
+            if (canvas) {
+            const qrDataUrl = canvas.toDataURL();
+            document.getElementById('qr-code').src = qrDataUrl;
+            }
+        }, 50);
+        } else {
+        alert('Please enter a valid URL.');
+    }
 }
 
 function loadRecipe() {
@@ -310,6 +325,5 @@ document.addEventListener('DOMContentLoaded', function() {
         resizeElement();
 
     }, 50);
-    loadRecipe()
-
+    loadRecipe();
 });

@@ -1,10 +1,10 @@
-import ejs from 'ejs';
 import dotenv from 'dotenv';
-import puppeteer from "puppeteer-core";
+import ejs from 'ejs';
 import fs from 'fs';
+import puppeteer from 'puppeteer-core';
 
-import { getGlobalID } from '../util/util.js'
-import { queryMetaObject } from '../shopify/query.js'
+import { queryMetaObject } from '../shopify/query.js';
+import { getGlobalID } from '../util/util.js';
 
 
 var recipeCss = {
@@ -23,9 +23,10 @@ export async function printCustomerRecipe(req, res) {
 
     const recipeID = req.body.recipe_id; 
     const customerID = req.body.customer_id;
+    const recipeUrl = req.body.recipe_url;
     const recipeGID = getGlobalID('metaobject', recipeID);
 
-    const [outputFile, pdfBuffer] = await printRecipe(customerID, recipeGID);
+    const [outputFile, pdfBuffer] = await printRecipe(customerID, recipeGID, recipeUrl);
 
     // Set the response headers
     res.setHeader(
@@ -36,7 +37,7 @@ export async function printCustomerRecipe(req, res) {
     res.send(pdfBuffer);
 }
 
-export async function printRecipe(customerID, recipeGID) {
+export async function printRecipe(customerID, recipeGID, recipeUrl) {
 
     ejs.clearCache();
 
@@ -48,6 +49,8 @@ export async function printRecipe(customerID, recipeGID) {
     const outputName = `${MetaObject.title}`.replaceAll(' ', '_');
     const outputFile = `${outputName}.pdf`;
     const outputDir = `./print/output`;
+
+    MetaObject.url = recipeUrl;
 
     const pdfBuffer = await generatePdf(MetaObject, outputDir, outputName);
 
@@ -69,7 +72,8 @@ async function generatePdf(recipeData, outputDir, fileName) {
         if (process.env.ENV == "DEV" ) {
             console.debug('[DEBUG] Using local browser')
             var browser = await puppeteer.launch({
-                executablePath: 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
+                // executablePath: 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
+                executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
         });
         } else {
             var browser = await puppeteer.connect({ browserWSEndpoint: process.env.BROWSER_WS_ENDPOINT });
@@ -77,7 +81,7 @@ async function generatePdf(recipeData, outputDir, fileName) {
 
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'load' });
-        const pdfBuffer = await page.pdf({ format: 'A4' });
+        const pdfBuffer = await page.pdf({ format: 'A5' });
 
         if (process.env.ENV == "DEV" ) {
             console.debug(`[DEBUG] Generating debug files: ${outputDir}`);

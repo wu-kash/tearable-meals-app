@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href='https://fonts.googleapis.com/css?family=JetBrains Mono' rel='stylesheet'>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
         <title><%= recipeData.title %></title>
 
         <%- recipeCss.style %>
@@ -17,6 +18,9 @@
         </div>
 
         <div class="div-recipe-info">
+            <a target="_blank" id="qr-link">
+                <img id="qr-code" alt="QR Code" class="img-recipe-info-qr">
+            </a>
             <div class="div-recipe-info-text">
                 <div class="div-recipe-info-text-row">
                     <img src="https://cdn.shopify.com/s/files/1/0917/9286/7628/files/content_recipe_symbol_portions.png?v=1736098366" alt="logo" class="img-recipe-info-text-symbol">
@@ -76,6 +80,8 @@
             <% recipeData.cooking_steps.forEach(function(step) { %>
             addCookingStepToList("<%= step %>");
             <% }); %>
+
+            generateUrlQr("<%= recipeData.url %>");
         </script>
     </body>
 </html>
